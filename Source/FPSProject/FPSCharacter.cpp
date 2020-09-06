@@ -5,13 +5,27 @@
 #include "Engine/Engine.h"
 #include "GameFramework/Controller.h"
 #include "Components/InputComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values
 AFPSCharacter::AFPSCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	FPSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	FPSCameraComponent->SetupAttachment((USceneComponent*)GetCapsuleComponent());
+	FPSCameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f + BaseEyeHeight));
+	FPSCameraComponent->bUsePawnControlRotation = true;
+
+
+	FPSMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh"));
+	FPSMesh->SetOnlyOwnerSee(true);
+	FPSMesh->SetupAttachment(FPSCameraComponent);
+	FPSMesh->bCastDynamicShadow = false;
+	FPSMesh->CastShadow = false;
+
+	GetMesh()->SetOwnerNoSee(true);
 }
 
 // Called when the game starts or when spawned
@@ -23,7 +37,7 @@ void AFPSCharacter::BeginPlay()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("We are using FPSCharacter."));
 	}
-	
+
 }
 
 // Called every frame
