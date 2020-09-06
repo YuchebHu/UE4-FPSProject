@@ -10,6 +10,8 @@ AFPSProjectile::AFPSProjectile()
 	PrimaryActorTick.bCanEverTick = true;
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
+	CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
+
 	CollisionComponent->InitSphereRadius(15.f);
 	RootComponent = CollisionComponent;
 
@@ -20,6 +22,11 @@ AFPSProjectile::AFPSProjectile()
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
 	ProjectileMovementComponent->bShouldBounce = true;
 	ProjectileMovementComponent->Bounciness = 0.3f;
+
+	InitialLifeSpan = 5.0f;
+
+	CollisionComponent->OnComponentHit.AddDynamic(this, &AFPSProjectile::OnHit);
+
 
 }
 
@@ -35,6 +42,14 @@ void AFPSProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AFPSProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (OtherActor != this && OtherComponent->IsSimulatingPhysics())
+	{
+		OtherComponent->AddImpulseAtLocation(ProjectileMovementComponent->Velocity * 100.0f, Hit.ImpactPoint);
+	}
 }
 
 void AFPSProjectile::FireInDirection(const FVector& ShotDirection)
